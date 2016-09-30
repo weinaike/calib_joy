@@ -58,6 +58,7 @@ private:
     Mat m_src_left,m_src_right;//摄像头读取的图片
     Mat m_show_dispa;
     QImage m_image_left,m_image_right;//界面显示的图片
+    int num_camera;
 };
 
 #endif // DIALOG_H
