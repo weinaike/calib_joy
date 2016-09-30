@@ -19,6 +19,7 @@ Dialog::Dialog(QWidget *parent) :
     ui->pushButton_DispStop->setDisabled(true);
     ui->pushButton_Calib->setDisabled(false);
     ui->pushButton_OpenCam->setEnabled(true);
+    num_camera = 0;
 }
 
 Dialog::~Dialog()
@@ -103,7 +104,11 @@ void Dialog::on_pushButton_OpenCam_clicked()
 {
     m_timer.stop();
     m_cap_left.open(0);
+    if(m_cap_left.isOpened())
+        num_camera++;
     m_cap_right.open(1);
+    if(m_cap_right.isOpened())
+        num_camera++;
     m_cap_left.set(CV_CAP_PROP_FRAME_HEIGHT,640);
     m_cap_left.set(CV_CAP_PROP_FRAME_WIDTH,480);
     m_cap_right.set(CV_CAP_PROP_FRAME_HEIGHT,640);
@@ -174,6 +179,19 @@ void Dialog::on_pushButton_Calib_clicked()
     }
     if(ui->radioButton_cam->isChecked())
     {
+        switch (num_camera) {
+        case 2:
+            m_cap_right>>m_cap_right;
+
+        case 1:
+            m_cap_left>>m_src_left;
+
+            break;
+        default:
+            QMessageBox::about(this,"error","no camera !");
+            break;
+        }
+
 
     }
 
