@@ -1,6 +1,7 @@
 #ifndef CPARAMCALIB_H
 #define CPARAMCALIB_H
 #include "opencv.hpp"
+#include <string>
 using namespace cv;
 
 class CParamCalib

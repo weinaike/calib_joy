@@ -1,5 +1,5 @@
 #include "cparamcalib.h"
-
+#include <string>
 CParamCalib::CParamCalib()
 {
 

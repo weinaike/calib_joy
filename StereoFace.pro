@@ -4,13 +4,11 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
-
+QT          += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
-TARGET = StereoFace
-TEMPLATE = app
-
+CONFIG      +=c++11
+TARGET      = StereoFace
+TEMPLATE    = app
 
 SOURCES += main.cpp\
         dialog.cpp \
@@ -27,12 +25,11 @@ HEADERS  += dialog.h \
 
 FORMS    += dialog.ui
 
+INCLUDEPATH +=/usr/include/opencv \
+             /usr/include/opencv2 \
+             /usr/include \
 
-INCLUDEPATH +=E:\opencv\build\include\opencv\
-             E:\opencv\build\include\opencv2\
-             E:\opencv\build\include\
-            C:\Qt\tbb44_20151115oss\include
-
-LIBS+=E:\opencv\build\mingw\lib\libopencv_*.a\
+LIBS+=/usr/lib/x86_64-linux-gnu/libopencv_*.so \
+#LIBS+=/home/wnk/opencv/install/lib/libopencv_*.so \
 
 

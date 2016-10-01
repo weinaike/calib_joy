@@ -2,56 +2,65 @@
 
 CStereoCalib::CStereoCalib()
 {
-
+    m_param = CParamCalib();
+    flag = 0;
+    flag_stereo = false;
 }
 
 
 double CStereoCalib::CalibStart()
 {
-
     Mat cameraMat1,DistMat1;//内部参数，外部参数
-    m_err1=calibrateCamera(m_objectPointVect1,m_imagePointVect1,m_imagesize,cameraMat1,DistMat1,m_rvec1,m_tvec1,
-                                CV_CALIB_FIX_K3);
-    qDebug()<<"err1:"<<sqrt(m_err1/81);
+    if(!m_objectPointVect1.empty())
+    {
+        m_err1=calibrateCamera(m_objectPointVect1,m_imagePointVect1,m_imagesize,
+                           cameraMat1,DistMat1,m_rvec1,m_tvec1,flag);
+        qDebug()<<"flag: "<<flag<<endl;
+        qDebug()<<"err1:"<<m_err1;
+        m_err=m_err1;
+        m_param.m_CameraMat1=cameraMat1;
+        m_param.m_DistMat1=DistMat1;
+
+    }
     Mat cameraMat2,DistMat2;//内部参数，外部参数
-    m_err2=calibrateCamera(m_objectPointVect2,m_imagePointVect2,m_imagesize,cameraMat2,DistMat2,m_rvec2,m_tvec2,
-                                CV_CALIB_FIX_K3);
-    qDebug()<<"err2:"<<sqrt(m_err2/81);
-    Mat R,T,E,F,Rout;
-
-    m_err=stereoCalibrate(m_objectPointVect1,m_imagePointVect1,m_imagePointVect2,cameraMat1,DistMat1,cameraMat2,DistMat2,m_imagesize,R,T,E,F,
-                                   TermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 100, 1e-5),
-                                   CV_CALIB_FIX_INTRINSIC);
-    Rodrigues(R,Rout);
-    qDebug()<<"cameraMat1"<<cameraMat1.at<double>(0,0);
-    qDebug()<<"cameraMat2"<<cameraMat2.at<double>(0,0);
-    qDebug()<<"T:"<<T.at<double>(0,0);
-    Mat R1,R2,P1,P2,Q;
-    Rect roi1,roi2;
-    stereoRectify(cameraMat1,DistMat1,cameraMat2,DistMat2,m_imagesize,R,T,R1,R2,P1,P2,Q,CALIB_ZERO_DISPARITY,-1,Size(),&roi1,&roi2);
-    Mat map1x,map1y,map2x,map2y;
-    initUndistortRectifyMap(cameraMat1,DistMat1,R1,P1,m_imagesize,CV_32FC1,map1x,map1y);
-    initUndistortRectifyMap(cameraMat2,DistMat2,R2,P2,m_imagesize,CV_32FC1,map2x,map2y);
-    m_param.m_CameraMat1=cameraMat1;
-    m_param.m_CameraMat2=cameraMat2;
-    m_param.m_DistMat1=DistMat1;
-    m_param.m_DistMat2=DistMat2;
-    m_param.m_map1x=map1x;
-    m_param.m_map1y=map1y;
-    m_param.m_map2x=map2x;
-    m_param.m_map2y=map2y;
-    m_param.m_P1=P1;
-    m_param.m_P2=P2;
-    m_param.m_Q=Q;
-    m_param.m_R=R;
-    m_param.m_R1=R1;
-    m_param.m_R2=R2;
-    m_param.m_roi1=roi1;
-    m_param.m_roi2=roi2;
-    m_param.m_T=T;
+    if(!m_objectPointVect2.empty())
+    {
+        m_err2=calibrateCamera(m_objectPointVect2,m_imagePointVect2,m_imagesize,
+                           cameraMat2,DistMat2,m_rvec2,m_tvec2,flag);
+        qDebug()<<"err2:"<<m_err2;
+        m_param.m_CameraMat2=cameraMat2;
+        m_param.m_DistMat2=DistMat2;
+    }
+    if(flag_stereo){
+        Mat R,T,E,F,Rout;
+        Mat R1,R2,P1,P2,Q;
+        Rect roi1,roi2;
+        Mat map1x,map1y,map2x,map2y;
+        m_err=stereoCalibrate(m_objectPointVect1,m_imagePointVect1,m_imagePointVect2,cameraMat1,DistMat1,cameraMat2,DistMat2,m_imagesize,R,T,E,F,
+                                   TermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 100, 1e-5), CV_CALIB_FIX_INTRINSIC);
+        Rodrigues(R,Rout);
+        qDebug()<<"cameraMat1"<<cameraMat1.at<double>(0,0);
+        qDebug()<<"cameraMat2"<<cameraMat2.at<double>(0,0);
+        qDebug()<<"T:"<<T.at<double>(0,0);
+        stereoRectify(cameraMat1,DistMat1,cameraMat2,DistMat2,m_imagesize,R,T,R1,R2,P1,P2,Q,CALIB_ZERO_DISPARITY,-1,Size(),&roi1,&roi2);
+        initUndistortRectifyMap(cameraMat1,DistMat1,R1,P1,m_imagesize,CV_32FC1,map1x,map1y);
+        initUndistortRectifyMap(cameraMat2,DistMat2,R2,P2,m_imagesize,CV_32FC1,map2x,map2y);
+        m_param.m_map1x=map1x;
+        m_param.m_map1y=map1y;
+        m_param.m_map2x=map2x;
+        m_param.m_map2y=map2y;
+        m_param.m_P1=P1;
+        m_param.m_P2=P2;
+        m_param.m_Q=Q;
+        m_param.m_R=R;
+        m_param.m_R1=R1;
+        m_param.m_R2=R2;
+        m_param.m_roi1=roi1;
+        m_param.m_roi2=roi2;
+        m_param.m_T=T;
+    }
     m_param.SaveParam();
-
-    return sqrt(m_err/m_boardsize.width/m_boardsize.height);
+    return m_err;
 }
 QImage CStereoCalib::getcorners(QString & filename,vector< vector<Point3f> > &m_objectPointVect,vector< vector<Point2f> > &m_imagePointVect)
 {

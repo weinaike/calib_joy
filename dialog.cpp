@@ -3,6 +3,7 @@
 #include "qfiledialog.h"
 #include "opencv.hpp"
 #include "qdebug.h"
+#include <QDateTime>
 using namespace cv;
 
 Dialog::Dialog(QWidget *parent) :
@@ -11,15 +12,43 @@ Dialog::Dialog(QWidget *parent) :
 {
 
     ui->setupUi(this);
+    num_camera = 0;
+    height = (ui->lineEdit_height->text()).toInt();
+    width = (ui->lineEdit_width->text()).toInt();
+    m_cap_left.set(CV_CAP_PROP_FRAME_HEIGHT,height);
+    m_cap_left.set(CV_CAP_PROP_FRAME_WIDTH,width);
+    m_cap_right.set(CV_CAP_PROP_FRAME_HEIGHT,height);
+    m_cap_right.set(CV_CAP_PROP_FRAME_WIDTH,width);
 
+    if(m_cap_left.open(0))
+    {
+        num_camera++;
+        m_cap_left>>m_src_left;
+        m_cap_left>>m_src_left;
+        m_cap_left>>m_src_left;
+    }
+    if(m_cap_right.open(1))
+    {
+        num_camera++;
+        m_cap_right>>m_src_right;
+        m_cap_right>>m_src_right;
+    }
+
+    qDebug()<<"cameras: "<<num_camera<<endl;
     m_pStereoCalib=new CStereoCalib;
     m_pStereoMatch=new CStereoMatch;
+    m_pStereoCalib->m_boardsize.width=(ui->lineEdit_px->text()).toInt();
+    m_pStereoCalib->m_boardsize.height=(ui->lineEdit_py->text()).toInt();
+    m_pStereoCalib->m_squarelength=(ui->lineEdit_length->text()).toFloat();
+    m_pStereoCalib->num_used=(ui->lineEdit_pic_num->text()).toInt();
+
     ui->pushButton_CloseCam->setDisabled(true);
     ui->pushButton_DispStart->setDisabled(true);
     ui->pushButton_DispStop->setDisabled(true);
     ui->pushButton_Calib->setDisabled(false);
     ui->pushButton_OpenCam->setEnabled(true);
-    num_camera = 0;
+    ui->pushButton_chessboard->setEnabled(false);
+    num_getchessbord = 0;
 }
 
 Dialog::~Dialog()
@@ -27,61 +56,117 @@ Dialog::~Dialog()
     delete ui;
     delete m_pStereoCalib;
     delete m_pStereoMatch;
+    switch (num_camera) {
+    case 2:
+        m_cap_right.release();
+    case 1:
+        m_cap_left.release();
+    default:
+        break;
+    }
 }
 
-void Dialog::on_lineEdit_px_editingFinished()
-{
 
+
+void Dialog::onTimer(){
+    switch (num_camera) {
+    case 2:
+    {
+        QImage imagescaled=m_image_right.scaled(320,240,Qt::KeepAspectRatio);
+        ui->label_right->setPixmap(QPixmap::fromImage(imagescaled));
+    }
+    case 1:
+    {
+        QImage imagescaled=m_image_left.scaled(320,240,Qt::KeepAspectRatio);
+        ui->label_left->setPixmap(QPixmap::fromImage(imagescaled));
+        break;
+    }
+    default:
+        break;
+    }
 }
 
+void Dialog::updateflag(){
+    m_pStereoCalib->m_boardsize.width=(ui->lineEdit_px->text()).toInt();
+    m_pStereoCalib->m_boardsize.height=(ui->lineEdit_py->text()).toInt();
+    m_pStereoCalib->m_squarelength=(ui->lineEdit_length->text()).toFloat();
+    m_pStereoCalib->num_used=(ui->lineEdit_pic_num->text()).toInt();
+    m_pStereoCalib->flag = 0;
+    if(ui->checkBox_FAR->isChecked())
+        m_pStereoCalib->flag |= CV_CALIB_FIX_ASPECT_RATIO;
+    if(ui->checkBox_FK1->isChecked())
+        m_pStereoCalib->flag |= CV_CALIB_FIX_K1;
+    if(ui->checkBox_FK2->isChecked())
+        m_pStereoCalib->flag |= CV_CALIB_FIX_K2;
+    if(ui->checkBox_FK3->isChecked())
+        m_pStereoCalib->flag |= CV_CALIB_FIX_K3;
+    if(ui->checkBox_FK4->isChecked())
+        m_pStereoCalib->flag |= CV_CALIB_FIX_K4;
+    if(ui->checkBox_FK5->isChecked())
+        m_pStereoCalib->flag |= CV_CALIB_FIX_K5;
+    if(ui->checkBox_FK6->isChecked())
+        m_pStereoCalib->flag |= CV_CALIB_FIX_K6;
+    if(ui->checkBox_FPP->isChecked())
+        m_pStereoCalib->flag |= CV_CALIB_FIX_PRINCIPAL_POINT;
+    if(ui->checkBox_RM->isChecked())
+        m_pStereoCalib->flag |= CV_CALIB_RATIONAL_MODEL;
+    if(ui->checkBox_UIG->isChecked())
+        m_pStereoCalib->flag |= CV_CALIB_USE_INTRINSIC_GUESS;
+}
 
-void Dialog::onTimer(){    
-
-    QImage imagescaled=m_image_left.scaled(320,240,Qt::KeepAspectRatio);
-    ui->label_left->setPixmap(QPixmap::fromImage(imagescaled));
-    imagescaled=m_image_right.scaled(320,240,Qt::KeepAspectRatio);
-    ui->label_right->setPixmap(QPixmap::fromImage(imagescaled));
-
+void Dialog::show_image(const Mat & m_src,QImage & imagescaled){
+    QImage m_image;
+    Mat temp;
+    m_src.copyTo(temp);
+    if(ui->radioButton_cam->isChecked()){
+        bool found = false;
+        vector<Point2f> pointBuf;
+        Size sz = Size(m_pStereoCalib->m_boardsize);
+        found = findChessboardCorners(temp,sz,pointBuf);
+        if(found){
+            Mat viewGray;
+            cvtColor(temp, viewGray, COLOR_BGR2GRAY);
+            cornerSubPix( viewGray, pointBuf, Size(11,11),
+                          Size(-1,-1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
+            drawChessboardCorners(temp,m_pStereoCalib->m_boardsize,Mat(pointBuf),found);
+        }
+    }
+    m_image=Mat2QImage(temp);
+    imagescaled=m_image.scaled(320,240,Qt::KeepAspectRatio);
 }
 
 void Dialog::onTimer_cam()
 {
-    if(ui->checkBox_rectify->isChecked())
+    switch (num_camera) {
+    case 2:
     {
-        m_cap_left>>m_src_left;
         m_cap_right>>m_src_right;
-
-        if(!m_pStereoCalib->m_param.m_map1x.empty())
-        {
-            remap(m_src_left,m_src_left,m_pStereoCalib->m_param.m_map1x,m_pStereoCalib->m_param.m_map1y,INTER_NEAREST);
-            remap(m_src_right,m_src_right,m_pStereoCalib->m_param.m_map2x,m_pStereoCalib->m_param.m_map2y,INTER_NEAREST);
+        if(ui->checkBox_rectify->isChecked()){
+            Mat temp;
+            undistort(m_src_right, temp, m_pStereoCalib->m_param.m_CameraMat2,
+                      m_pStereoCalib->m_param.m_DistMat2);
+            show_image(temp,m_image_right);
+        }else{
+            show_image(m_src_right,m_image_right);
         }
-        else
-        {
-            QMessageBox::about(this,"error","no calibration");
-            ui->checkBox_rectify->setChecked(false);
-        }
-
-        m_image_left=Mat2QImage(m_src_left);
-        m_image_right=Mat2QImage(m_src_right);
-        QImage imagescaled=m_image_left.scaled(320,240,Qt::KeepAspectRatio);
-        ui->label_left->setPixmap(QPixmap::fromImage(imagescaled));
-        imagescaled=m_image_right.scaled(320,240,Qt::KeepAspectRatio);
-        ui->label_right->setPixmap(QPixmap::fromImage(imagescaled));
-
+        ui->label_right->setPixmap(QPixmap::fromImage(m_image_right));
     }
-    else
+    case 1:
     {
         m_cap_left>>m_src_left;
-        m_cap_right>>m_src_right;
-        //GaussianBlur(m_src_left,m_src_left,Size(9,9),0,0);
-        //blur(m_src_right,m_src_right,Size(5,5));
-        m_image_left=Mat2QImage(m_src_left);
-        m_image_right=Mat2QImage(m_src_right);
-        QImage imagescaled=m_image_left.scaled(320,240,Qt::KeepAspectRatio);
-        ui->label_left->setPixmap(QPixmap::fromImage(imagescaled));
-        imagescaled=m_image_right.scaled(320,240,Qt::KeepAspectRatio);
-        ui->label_right->setPixmap(QPixmap::fromImage(imagescaled));
+        if(ui->checkBox_rectify->isChecked()){
+            Mat temp;
+            undistort(m_src_left, temp, m_pStereoCalib->m_param.m_CameraMat1,
+                      m_pStereoCalib->m_param.m_DistMat1);
+            show_image(temp,m_image_left);
+        }else{
+            show_image(m_src_left,m_image_left);
+        }
+        ui->label_left->setPixmap(QPixmap::fromImage(m_image_left));
+        break;
+    }
+    default:
+        break;
     }
 
 }
@@ -90,121 +175,117 @@ void Dialog::onTimer_cam()
 void Dialog::on_pushButton_CloseCam_clicked()
 {
     m_timer.stop();
-    m_cap_left.release();
-    m_cap_right.release();
-
     ui->pushButton_CloseCam->setDisabled(true);
     ui->pushButton_DispStart->setDisabled(true);
     ui->pushButton_DispStop->setDisabled(true);
     ui->pushButton_OpenCam->setEnabled(true);
-
+    if(ui->radioButton_cam->isChecked())
+        ui->pushButton_chessboard->setEnabled(false);
 }
 
 void Dialog::on_pushButton_OpenCam_clicked()
 {
-    m_timer.stop();
-    m_cap_left.open(0);
-    if(m_cap_left.isOpened())
-        num_camera++;
-    m_cap_right.open(1);
-    if(m_cap_right.isOpened())
-        num_camera++;
-    m_cap_left.set(CV_CAP_PROP_FRAME_HEIGHT,640);
-    m_cap_left.set(CV_CAP_PROP_FRAME_WIDTH,480);
-    m_cap_right.set(CV_CAP_PROP_FRAME_HEIGHT,640);
-    m_cap_right.set(CV_CAP_PROP_FRAME_WIDTH,480);
     connect(&m_timer,SIGNAL(timeout()),this,SLOT(onTimer_cam()));
-    m_timer.start(200);
-
+    m_timer.start(100);
     ui->pushButton_OpenCam->setDisabled(true);
     ui->pushButton_CloseCam->setEnabled(true);
     ui->pushButton_DispStart->setEnabled(true);
+    if(ui->radioButton_cam->isChecked())
+        ui->pushButton_chessboard->setEnabled(true);
 
 }
 
 void Dialog::on_pushButton_Calib_clicked()
 {
+    ui->checkBox_rectify->setEnabled(false);
+    ui->pushButton_Calib->setEnabled(false);
     //导入界面参数
-    connect(&m_timer,SIGNAL(timeout()),this,SLOT(onTimer()));
-    m_pStereoCalib->m_boardsize.width=(ui->lineEdit_px->text()).toInt();
-    m_pStereoCalib->m_boardsize.height=(ui->lineEdit_py->text()).toInt();
-    m_pStereoCalib->m_squarelength=(ui->lineEdit_length->text()).toFloat();
-    m_pStereoCalib->m_images=(ui->lineEdit_pic_num->text()).toInt();
-    qDebug()<<m_pStereoCalib->m_squarelength;
-    qDebug()<<m_pStereoCalib->m_boardsize.height;
+    updateflag();
     if(ui->radioButton_img->isChecked())
     {
-
-        QStringList filenamelist_left=QFileDialog::getOpenFileNames(
-                    this,QString::fromLocal8Bit("left camera"),
-                    "",
-                    tr("Images (*.png *.bmp *.jpg *.tif *.GIF )"));
-        QStringList filenamelist_right=QFileDialog::getOpenFileNames(
-                    this,QString::fromLocal8Bit("right camera"),
-                    "",
-                    tr("Images (*.png *.bmp *.jpg *.tif *.GIF )"));
-
-
-        if((!filenamelist_left.empty())&&(!filenamelist_right.empty()))
+        connect(&m_timer,SIGNAL(timeout()),this,SLOT(onTimer()));
+        switch (num_camera) {
+        case 2:
         {
-
-            if(filenamelist_left.count()<m_pStereoCalib->m_images)
-            {
-                QMessageBox::about(this,"error","number of images is not enough");
-            }
-            else
-            {
-                m_pStereoCalib->m_fleftlist=filenamelist_left;
-                m_pStereoCalib->m_frightlist=filenamelist_right;
-                for(int i=0;i<m_pStereoCalib->m_images;++i)
+            QStringList filenamelist_right=QFileDialog::getOpenFileNames(
+                        this,QString::fromLocal8Bit("right camera"),"",
+                        tr("Images (*.png *.bmp *.jpg *.tif *.GIF )"));
+            if(!filenamelist_right.empty()){
+                if(filenamelist_right.count()<m_pStereoCalib->num_used)
                 {
-                    QString filename1=filenamelist_left[i];
-                    m_image_left=m_pStereoCalib->getcorners(filename1,m_pStereoCalib->m_objectPointVect1,m_pStereoCalib->m_imagePointVect1);
-                    QString filename2=filenamelist_right[i];
-                    m_image_right=m_pStereoCalib->getcorners(filename2,m_pStereoCalib->m_objectPointVect2,m_pStereoCalib->m_imagePointVect2);
-
+                    QMessageBox::about(this,"error","number of images is not enough");
+                }
+                else
+                {
+                    m_pStereoCalib->m_frightlist=filenamelist_right;
+                    for(int i=0;i<m_pStereoCalib->num_used;++i)
+                    {
+                        QString filename2=filenamelist_right[i];
+                        m_image_right=m_pStereoCalib->getcorners(filename2,
+                                m_pStereoCalib->m_objectPointVect2,m_pStereoCalib->m_imagePointVect2);
+                    }
                 }
             }
-            m_timer.start(100);
-            double err=m_pStereoCalib->CalibStart();
-            qDebug()<<err;
-            QMessageBox::about(this,"error of Calibration is",QString::number(err));
+            else{
+                QMessageBox::about(this,"error","no images");
+            }
         }
-        else
+        case 1:
         {
-            QMessageBox::about(this,"error","images are not loaded");
+            QStringList filenamelist_left=QFileDialog::getOpenFileNames(
+                        this,QString::fromLocal8Bit("left camera"),"",
+                        tr("Images (*.png *.bmp *.jpg *.tif *.GIF )"));
+            if(!filenamelist_left.empty()){
+                if(filenamelist_left.count()<m_pStereoCalib->num_used)
+                {
+                    QMessageBox::about(this,"error","number of images is not enough");
+                }
+                else
+                {
+                    m_pStereoCalib->m_frightlist=filenamelist_left;
+                    for(int i=0;i<m_pStereoCalib->num_used;++i)
+                    {
+                        QString filename1=filenamelist_left[i];
+                        m_image_left=m_pStereoCalib->getcorners(filename1,
+                                                                m_pStereoCalib->m_objectPointVect1,
+                                                                m_pStereoCalib->m_imagePointVect1);
+                    }
+                }
+            }
+            else{
+                QMessageBox::about(this,"error","no images");
+            }
+            break;
         }
-
+        default:
+            QMessageBox::about(this,"error","no camera");
+            break;
+        }
+        m_timer.start(10);
+        double err=m_pStereoCalib->CalibStart();
+        qDebug()<<err;
+        QMessageBox::about(this,"error of Calibration is",QString::number(err));
 
     }
     if(ui->radioButton_cam->isChecked())
     {
-        switch (num_camera) {
-        case 2:
-            m_cap_right>>m_cap_right;
-
-        case 1:
-            m_cap_left>>m_src_left;
-
-            break;
-        default:
-            QMessageBox::about(this,"error","no camera !");
-            break;
-        }
-
-
+         QMessageBox::about(this,"error","切换到图片模式");
     }
-
+    ui->checkBox_rectify->setEnabled(true);
+    ui->pushButton_Calib->setEnabled(true);
 }
 
 void Dialog::on_radioButton_img_clicked()
 {
     ui->radioButton_img->setChecked(true);
+    ui->pushButton_chessboard->setEnabled(false);
 }
 
 void Dialog::on_radioButton_cam_clicked()
 {
     ui->radioButton_cam->setChecked(true);
+    if(ui->pushButton_CloseCam->isEnabled())
+        ui->pushButton_chessboard->setEnabled(true);
 }
 
 
@@ -408,4 +489,89 @@ void Dialog::on_radioButton_GC_clicked()
     m_pStereoMatch->GCState->numberOfDisparities=(ui->spinBox_numDisp->text()).toInt();
     m_pStereoMatch->GCState->minDisparity=(ui->spinBox_minDisp->text()).toInt();
     m_pStereoMatch->m_color_value=(ui->spinBox_ColorValue->text()).toInt();
+}
+
+void Dialog::on_lineEdit_py_editingFinished()
+{
+    m_pStereoCalib->m_boardsize.height=(ui->lineEdit_py->text()).toInt();
+}
+
+void Dialog::on_lineEdit_px_editingFinished()
+{
+    m_pStereoCalib->m_boardsize.width=(ui->lineEdit_px->text()).toInt();
+}
+
+void Dialog::on_lineEdit_length_editingFinished()
+{
+    m_pStereoCalib->m_squarelength=(ui->lineEdit_length->text()).toFloat();
+}
+
+void Dialog::on_lineEdit_pic_num_editingFinished()
+{
+    m_pStereoCalib->num_used=(ui->lineEdit_pic_num->text()).toInt();
+}
+
+void Dialog::on_pushButton_chessboard_clicked()
+{
+    QDateTime time(QDateTime::currentDateTime());//获取系统现在的时间
+    QString str = time.toString("yyyy_MM_dd_hh_mm_ss"); //设置显示格式
+    std::string filename = str.toStdString();
+    switch (num_camera) {
+    case 2:
+        imwrite("right_"+filename+".jpg",m_src_right);
+    case 1:
+        imwrite("left_"+filename+".jpg",m_src_left);
+        break;
+    default:
+        break;
+    }
+    num_getchessbord++;
+
+    ui->label_info->setText("第"+QString::number(num_getchessbord,10)+"张");
+}
+
+void Dialog::on_checkBox_rectify_clicked()
+{
+    m_pStereoCalib->m_param.GetParam();
+    double fovx,fovy,focallength;
+    Point2d principalPoint;
+    double aspectRatio;
+    calibrationMatrixValues(m_pStereoCalib->m_param.m_CameraMat1,
+                            Size(height,width), 4.8, 3.6,
+                            fovx, fovy, focallength,principalPoint,aspectRatio);
+    qDebug()<<"focal length: "<<focallength<<endl;
+    qDebug()<<"fovx: "<<fovx<<" fovy: "<<fovy<<endl;
+    qDebug()<<"principalPoint: ["<<principalPoint.x<<","<<principalPoint.y<<"]"<<endl;
+    qDebug()<<"aspectRatio: "<<aspectRatio<<endl;
+}
+
+
+
+void Dialog::on_pushButton_initCamera_clicked()
+{
+    m_timer.stop();
+    ui->pushButton_CloseCam->setEnabled(false);
+    ui->pushButton_OpenCam->setEnabled(true);
+    m_cap_left.release();
+    m_cap_right.release();
+    num_camera = 0;
+    height = (ui->lineEdit_height->text()).toInt();
+    width = (ui->lineEdit_width->text()).toInt();
+    m_cap_left.set(CV_CAP_PROP_FRAME_HEIGHT,height);
+    m_cap_left.set(CV_CAP_PROP_FRAME_WIDTH,width);
+    m_cap_right.set(CV_CAP_PROP_FRAME_HEIGHT,height);
+    m_cap_right.set(CV_CAP_PROP_FRAME_WIDTH,width);
+    if(m_cap_left.open(0))
+    {
+        num_camera++;
+        m_cap_left>>m_src_left;
+        m_cap_left>>m_src_left;
+        m_cap_left>>m_src_left;
+    }
+    if(m_cap_right.open(1))
+    {
+        num_camera++;
+        m_cap_right>>m_src_right;
+        m_cap_right>>m_src_right;
+    }
 }

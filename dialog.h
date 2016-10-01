@@ -21,9 +21,11 @@ public:
     explicit Dialog(QWidget *parent = 0);
     ~Dialog();
     void findfaces();
+    void show_image(const Mat & m_src,QImage & imagescaled);
+    void updateflag();
 
 private slots:
-    void on_lineEdit_px_editingFinished();
+
     void on_pushButton_CloseCam_clicked();
     void on_pushButton_OpenCam_clicked();
     void on_pushButton_Calib_clicked();
@@ -35,16 +37,20 @@ private slots:
     void onTimer_disp();
 
     void on_pushButton_DispStart_clicked();
-
     void on_pushButton_DispStop_clicked();
-
     void on_radioButton_BM_clicked();
-
     void on_radioButton_SGBM_clicked();
-
     void on_radioButton_VAR_clicked();
-
     void on_radioButton_GC_clicked();
+
+    void on_lineEdit_py_editingFinished();
+    void on_lineEdit_length_editingFinished();
+    void on_lineEdit_pic_num_editingFinished();
+    void on_lineEdit_px_editingFinished();
+    void on_pushButton_chessboard_clicked();
+
+    void on_checkBox_rectify_clicked();
+    void on_pushButton_initCamera_clicked();
 
 private:
     Ui::Dialog *ui;
@@ -59,6 +65,9 @@ private:
     Mat m_show_dispa;
     QImage m_image_left,m_image_right;//界面显示的图片
     int num_camera;
+    int num_getchessbord;
+    int height;
+    int width;
 };
 
 #endif // DIALOG_H
