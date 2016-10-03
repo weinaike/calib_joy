@@ -24,7 +24,6 @@ Dialog::Dialog(QWidget *parent) :
         m_cap_left.set(CV_CAP_PROP_FRAME_WIDTH,width);
         m_cap_left>>m_src_left;
         m_cap_left>>m_src_left;
-        m_cap_left>>m_src_left;
     }
     if(m_cap_right.open(1))
     {

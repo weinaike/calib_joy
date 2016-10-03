@@ -686,7 +686,7 @@
        <string>RECOMPUTE_EXTRINSIC</string>
       </property>
       <property name="checked">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
      </widget>
      <widget class="QCheckBox" name="checkBox_FCC">
@@ -702,7 +702,7 @@
        <string>CHECK_COND</string>
       </property>
       <property name="checked">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
      </widget>
      <widget class="QCheckBox" name="checkBox_FFS">
@@ -716,6 +716,9 @@
       </property>
       <property name="text">
        <string>FIX_SKEW</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="QCheckBox" name="checkBox_FFK1">

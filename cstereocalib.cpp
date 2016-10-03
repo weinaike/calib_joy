@@ -71,14 +71,15 @@ double CStereoCalib::CalibStart()
 }
 double CStereoCalib::FisheyeStart()
 {
-    Mat cameraMat1,DistMat1;//内部参数，外部参数
+    vector<Mat>().swap(m_rvec1);
+    vector<Mat>().swap(m_tvec1);
+    cv::Mat cameraMat1,DistMat1;//内部参数，外部参数
     if(!m_objectPointVect1.empty())
     {
         qDebug()<<"flag: "<<flag<<endl;
         m_err1=cv::fisheye::calibrate(m_objectPointVect1,m_imagePointVect1,m_imagesize,
                            cameraMat1,DistMat1,m_rvec1,m_tvec1,flag,
                            TermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 100, 1e-5));
-
         qDebug()<<"err1:"<<m_err1;
         m_err=m_err1;
         m_param.m_CameraMat1=cameraMat1;
@@ -88,6 +89,8 @@ double CStereoCalib::FisheyeStart()
     Mat cameraMat2,DistMat2;//内部参数，外部参数
     if(!m_objectPointVect2.empty())
     {
+        vector<Mat>().swap(m_rvec2);
+        vector<Mat>().swap(m_tvec2);
         m_err2=cv::fisheye::calibrate(m_objectPointVect2,m_imagePointVect2,m_imagesize,
                            cameraMat2,DistMat2,m_rvec2,m_tvec2,flag);
         qDebug()<<"err2:"<<m_err2;
