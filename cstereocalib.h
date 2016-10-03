@@ -4,13 +4,14 @@
 #include "cparamcalib.h"
 #include "qimage.h"
 #include "qimagemat.h"
-
+#include "opencv.hpp"
 using namespace cv;
 class CStereoCalib
 {
 public:
     CStereoCalib();
     double CalibStart();
+    double FisheyeStart();
     QImage getcorners(QString &,vector< vector<Point3f> >&,vector< vector<Point2f> > &);
 
 

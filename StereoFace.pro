@@ -25,11 +25,17 @@ HEADERS  += dialog.h \
 
 FORMS    += dialog.ui
 
-INCLUDEPATH +=/usr/include/opencv \
-             /usr/include/opencv2 \
-             /usr/include \
+INCLUDEPATH +=/usr/local/include/ \
+/usr/local/include/opencv \
+/usr/local/include/opencv2 \
 
-LIBS+=/usr/lib/x86_64-linux-gnu/libopencv_*.so \
-#LIBS+=/home/wnk/opencv/install/lib/libopencv_*.so \
+LIBS+=/usr/local/lib/libopencv_*.so \
+
+#INCLUDEPATH +=/usr/include/opencv \
+#             /usr/include/opencv2 \
+#             /usr/include \
+
+#LIBS+=/usr/lib/x86_64-linux-gnu/libopencv_*.so \
+
 
 

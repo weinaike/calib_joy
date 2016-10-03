@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>937</width>
-    <height>520</height>
+    <width>950</width>
+    <height>570</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -55,7 +55,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>260</y>
+     <y>320</y>
      <width>320</width>
      <height>240</height>
     </rect>
@@ -76,11 +76,11 @@
      <x>670</x>
      <y>10</y>
      <width>271</width>
-     <height>491</height>
+     <height>551</height>
     </rect>
    </property>
    <property name="currentIndex">
-    <number>2</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="calibrate">
     <attribute name="title">
@@ -90,8 +90,8 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>10</y>
-       <width>241</width>
+       <y>0</y>
+       <width>251</width>
        <height>241</height>
       </rect>
      </property>
@@ -266,8 +266,8 @@
      <widget class="QCheckBox" name="checkBox_rectify">
       <property name="geometry">
        <rect>
-        <x>100</x>
-        <y>144</y>
+        <x>170</x>
+        <y>143</y>
         <width>71</width>
         <height>16</height>
        </rect>
@@ -283,7 +283,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>171</y>
+        <y>170</y>
         <width>75</width>
         <height>23</height>
        </rect>
@@ -295,7 +295,7 @@
      <widget class="QPushButton" name="pushButton_Calib">
       <property name="geometry">
        <rect>
-        <x>100</x>
+        <x>90</x>
         <y>200</y>
         <width>71</width>
         <height>23</height>
@@ -309,7 +309,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>141</y>
+        <y>140</y>
         <width>75</width>
         <height>23</height>
        </rect>
@@ -321,8 +321,8 @@
      <widget class="QPushButton" name="pushButton_chessboard">
       <property name="geometry">
        <rect>
-        <x>100</x>
-        <y>171</y>
+        <x>90</x>
+        <y>140</y>
         <width>71</width>
         <height>22</height>
        </rect>
@@ -334,9 +334,9 @@
      <widget class="QLabel" name="label_info">
       <property name="geometry">
        <rect>
-        <x>180</x>
+        <x>90</x>
         <y>171</y>
-        <width>51</width>
+        <width>71</width>
         <height>20</height>
        </rect>
       </property>
@@ -386,7 +386,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>640</string>
+       <string>768</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_19">
@@ -425,7 +425,39 @@
        </rect>
       </property>
       <property name="text">
-       <string>480</string>
+       <string>1024</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_remap">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>203</y>
+        <width>61</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>remap</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_fisheye">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>173</y>
+        <width>71</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>鱼眼校正</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
       </property>
      </widget>
     </widget>
@@ -433,28 +465,28 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>260</y>
-       <width>241</width>
-       <height>191</height>
+       <y>250</y>
+       <width>251</width>
+       <height>141</height>
       </rect>
      </property>
      <property name="title">
-      <string>Flag</string>
+      <string>Normal Flag</string>
      </property>
      <widget class="QCheckBox" name="checkBox_UIG">
       <property name="geometry">
        <rect>
         <x>10</x>
         <y>20</y>
-        <width>231</width>
+        <width>161</width>
         <height>20</height>
        </rect>
       </property>
       <property name="text">
-       <string>CV_CALIB_USE_INTRINSIC_GUESS</string>
+       <string>USE_INTRINSIC_GUESS</string>
       </property>
       <property name="checked">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
      </widget>
      <widget class="QCheckBox" name="checkBox_FPP">
@@ -462,12 +494,12 @@
        <rect>
         <x>10</x>
         <y>40</y>
-        <width>221</width>
+        <width>161</width>
         <height>20</height>
        </rect>
       </property>
       <property name="text">
-       <string>CV_CALIB_FIX_PRINCIPAL_POINT</string>
+       <string>FIX_PRINCIPAL_POINT</string>
       </property>
       <property name="checked">
        <bool>true</bool>
@@ -478,12 +510,12 @@
        <rect>
         <x>10</x>
         <y>60</y>
-        <width>221</width>
+        <width>161</width>
         <height>20</height>
        </rect>
       </property>
       <property name="text">
-       <string>CV_CALIB_FIX_ASPECT_RATIO</string>
+       <string>FIX_ASPECT_RATIO</string>
       </property>
       <property name="checked">
        <bool>true</bool>
@@ -494,12 +526,12 @@
        <rect>
         <x>10</x>
         <y>80</y>
-        <width>221</width>
+        <width>161</width>
         <height>20</height>
        </rect>
       </property>
       <property name="text">
-       <string>CV_CALIB_ZERO_TANGENT_DIST</string>
+       <string>ZERO_TANGENT_DIST</string>
       </property>
      </widget>
      <widget class="QCheckBox" name="checkBox_RM">
@@ -507,22 +539,22 @@
        <rect>
         <x>10</x>
         <y>100</y>
-        <width>221</width>
+        <width>161</width>
         <height>20</height>
        </rect>
       </property>
       <property name="text">
-       <string>CV_CALIB_RATIONAL_MODEL</string>
+       <string>RATIONAL_MODEL</string>
       </property>
       <property name="checked">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
      </widget>
      <widget class="QCheckBox" name="checkBox_FK1">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>120</y>
+        <x>180</x>
+        <y>20</y>
         <width>71</width>
         <height>20</height>
        </rect>
@@ -534,8 +566,8 @@
      <widget class="QCheckBox" name="checkBox_FK2">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>140</y>
+        <x>180</x>
+        <y>40</y>
         <width>71</width>
         <height>20</height>
        </rect>
@@ -547,8 +579,8 @@
      <widget class="QCheckBox" name="checkBox_FK3">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>160</y>
+        <x>180</x>
+        <y>60</y>
         <width>71</width>
         <height>20</height>
        </rect>
@@ -560,8 +592,8 @@
      <widget class="QCheckBox" name="checkBox_FK5">
       <property name="geometry">
        <rect>
-        <x>110</x>
-        <y>140</y>
+        <x>180</x>
+        <y>100</y>
         <width>71</width>
         <height>20</height>
        </rect>
@@ -573,8 +605,8 @@
      <widget class="QCheckBox" name="checkBox_FK4">
       <property name="geometry">
        <rect>
-        <x>110</x>
-        <y>120</y>
+        <x>180</x>
+        <y>80</y>
         <width>71</width>
         <height>20</height>
        </rect>
@@ -586,14 +618,156 @@
      <widget class="QCheckBox" name="checkBox_FK6">
       <property name="geometry">
        <rect>
-        <x>110</x>
-        <y>160</y>
+        <x>180</x>
+        <y>120</y>
         <width>71</width>
         <height>20</height>
        </rect>
       </property>
       <property name="text">
        <string>FIX_K6</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_FFL">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>120</y>
+        <width>151</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>FIX_FOCAL_LENGTH</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_4">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>400</y>
+       <width>251</width>
+       <height>111</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Fisheye Flag</string>
+     </property>
+     <widget class="QCheckBox" name="checkBox_FUIG">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>161</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>USE_INTRINSIC_GUESS</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_FRE">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>171</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>RECOMPUTE_EXTRINSIC</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_FCC">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>221</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>CHECK_COND</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_FFS">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>80</y>
+        <width>221</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>FIX_SKEW</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_FFK1">
+      <property name="geometry">
+       <rect>
+        <x>180</x>
+        <y>20</y>
+        <width>71</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>FIX_K1</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_FFK2">
+      <property name="geometry">
+       <rect>
+        <x>180</x>
+        <y>40</y>
+        <width>71</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>FIX_K2</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_FFK3">
+      <property name="geometry">
+       <rect>
+        <x>180</x>
+        <y>60</y>
+        <width>71</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>FIX_K3</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_FFK4">
+      <property name="geometry">
+       <rect>
+        <x>180</x>
+        <y>80</y>
+        <width>71</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>FIX_K4</string>
       </property>
      </widget>
     </widget>
@@ -1026,6 +1200,38 @@
      <string>stitch</string>
     </attribute>
    </widget>
+  </widget>
+  <widget class="QLabel" name="label_left_info">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>260</y>
+     <width>320</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Box</enum>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_right_info">
+   <property name="geometry">
+    <rect>
+     <x>340</x>
+     <y>260</y>
+     <width>320</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Box</enum>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

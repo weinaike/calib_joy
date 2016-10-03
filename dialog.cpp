@@ -3,6 +3,7 @@
 #include "qfiledialog.h"
 #include "opencv.hpp"
 #include "qdebug.h"
+#include "time.h"
 #include <QDateTime>
 using namespace cv;
 
@@ -15,14 +16,12 @@ Dialog::Dialog(QWidget *parent) :
     num_camera = 0;
     height = (ui->lineEdit_height->text()).toInt();
     width = (ui->lineEdit_width->text()).toInt();
-    m_cap_left.set(CV_CAP_PROP_FRAME_HEIGHT,height);
-    m_cap_left.set(CV_CAP_PROP_FRAME_WIDTH,width);
-    m_cap_right.set(CV_CAP_PROP_FRAME_HEIGHT,height);
-    m_cap_right.set(CV_CAP_PROP_FRAME_WIDTH,width);
 
     if(m_cap_left.open(0))
     {
         num_camera++;
+        m_cap_left.set(CV_CAP_PROP_FRAME_HEIGHT,height);
+        m_cap_left.set(CV_CAP_PROP_FRAME_WIDTH,width);
         m_cap_left>>m_src_left;
         m_cap_left>>m_src_left;
         m_cap_left>>m_src_left;
@@ -30,6 +29,8 @@ Dialog::Dialog(QWidget *parent) :
     if(m_cap_right.open(1))
     {
         num_camera++;
+        m_cap_right.set(CV_CAP_PROP_FRAME_HEIGHT,height);
+        m_cap_right.set(CV_CAP_PROP_FRAME_WIDTH,width);
         m_cap_right>>m_src_right;
         m_cap_right>>m_src_right;
     }
@@ -92,26 +93,51 @@ void Dialog::updateflag(){
     m_pStereoCalib->m_squarelength=(ui->lineEdit_length->text()).toFloat();
     m_pStereoCalib->num_used=(ui->lineEdit_pic_num->text()).toInt();
     m_pStereoCalib->flag = 0;
-    if(ui->checkBox_FAR->isChecked())
-        m_pStereoCalib->flag |= CV_CALIB_FIX_ASPECT_RATIO;
-    if(ui->checkBox_FK1->isChecked())
-        m_pStereoCalib->flag |= CV_CALIB_FIX_K1;
-    if(ui->checkBox_FK2->isChecked())
-        m_pStereoCalib->flag |= CV_CALIB_FIX_K2;
-    if(ui->checkBox_FK3->isChecked())
-        m_pStereoCalib->flag |= CV_CALIB_FIX_K3;
-    if(ui->checkBox_FK4->isChecked())
-        m_pStereoCalib->flag |= CV_CALIB_FIX_K4;
-    if(ui->checkBox_FK5->isChecked())
-        m_pStereoCalib->flag |= CV_CALIB_FIX_K5;
-    if(ui->checkBox_FK6->isChecked())
-        m_pStereoCalib->flag |= CV_CALIB_FIX_K6;
-    if(ui->checkBox_FPP->isChecked())
-        m_pStereoCalib->flag |= CV_CALIB_FIX_PRINCIPAL_POINT;
-    if(ui->checkBox_RM->isChecked())
-        m_pStereoCalib->flag |= CV_CALIB_RATIONAL_MODEL;
-    if(ui->checkBox_UIG->isChecked())
-        m_pStereoCalib->flag |= CV_CALIB_USE_INTRINSIC_GUESS;
+    if (ui->checkBox_fisheye->isChecked()){
+        if(ui->checkBox_FUIG->isChecked())
+            m_pStereoCalib->flag |= cv::fisheye::CALIB_USE_INTRINSIC_GUESS;
+        if(ui->checkBox_FRE->isChecked())
+            m_pStereoCalib->flag |= cv::fisheye::CALIB_RECOMPUTE_EXTRINSIC;
+        if(ui->checkBox_FCC->isChecked())
+            m_pStereoCalib->flag |= cv::fisheye::CALIB_CHECK_COND;
+        if(ui->checkBox_FFS->isChecked())
+            m_pStereoCalib->flag |= cv::fisheye::CALIB_FIX_SKEW;
+        if(ui->checkBox_FFK1->isChecked())
+            m_pStereoCalib->flag |= cv::fisheye::CALIB_FIX_K1;
+        if(ui->checkBox_FFK2->isChecked())
+            m_pStereoCalib->flag |= cv::fisheye::CALIB_FIX_K2;
+        if(ui->checkBox_FFK3->isChecked())
+            m_pStereoCalib->flag |= cv::fisheye::CALIB_FIX_K3;
+        if(ui->checkBox_FFK4->isChecked())
+            m_pStereoCalib->flag |= cv::fisheye::CALIB_FIX_K4;
+    }
+    else{
+        if(ui->checkBox_UIG->isChecked())
+            m_pStereoCalib->flag |= CV_CALIB_USE_INTRINSIC_GUESS;
+        if(ui->checkBox_FAR->isChecked())
+            m_pStereoCalib->flag |= CV_CALIB_FIX_ASPECT_RATIO;
+        if(ui->checkBox_FPP->isChecked())
+            m_pStereoCalib->flag |= CV_CALIB_FIX_PRINCIPAL_POINT;
+        if(ui->checkBox_ZTD->isChecked())
+            m_pStereoCalib->flag |= CV_CALIB_ZERO_TANGENT_DIST;
+        if(ui->checkBox_FFL->isChecked())
+            m_pStereoCalib->flag |= CV_CALIB_FIX_FOCAL_LENGTH;
+        if(ui->checkBox_FK1->isChecked())
+            m_pStereoCalib->flag |= CV_CALIB_FIX_K1;
+        if(ui->checkBox_FK2->isChecked())
+            m_pStereoCalib->flag |= CV_CALIB_FIX_K2;
+        if(ui->checkBox_FK3->isChecked())
+            m_pStereoCalib->flag |= CV_CALIB_FIX_K3;
+        if(ui->checkBox_FK4->isChecked())
+            m_pStereoCalib->flag |= CV_CALIB_FIX_K4;
+        if(ui->checkBox_FK5->isChecked())
+            m_pStereoCalib->flag |= CV_CALIB_FIX_K5;
+        if(ui->checkBox_FK6->isChecked())
+            m_pStereoCalib->flag |= CV_CALIB_FIX_K6;
+        if(ui->checkBox_RM->isChecked())
+            m_pStereoCalib->flag |= CV_CALIB_RATIONAL_MODEL;
+
+    }
 }
 
 void Dialog::show_image(const Mat & m_src,QImage & imagescaled){
@@ -122,12 +148,15 @@ void Dialog::show_image(const Mat & m_src,QImage & imagescaled){
         bool found = false;
         vector<Point2f> pointBuf;
         Size sz = Size(m_pStereoCalib->m_boardsize);
-        found = findChessboardCorners(temp,sz,pointBuf);
+        found = findChessboardCorners(temp,sz,pointBuf,
+                                      CALIB_CB_FAST_CHECK|CV_CALIB_CB_ADAPTIVE_THRESH);
         if(found){
+            /*
             Mat viewGray;
             cvtColor(temp, viewGray, COLOR_BGR2GRAY);
             cornerSubPix( viewGray, pointBuf, Size(11,11),
                           Size(-1,-1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
+                          */
             drawChessboardCorners(temp,m_pStereoCalib->m_boardsize,Mat(pointBuf),found);
         }
     }
@@ -137,14 +166,29 @@ void Dialog::show_image(const Mat & m_src,QImage & imagescaled){
 
 void Dialog::onTimer_cam()
 {
+    //clock_t start,stop;
+    //start = clock();
     switch (num_camera) {
     case 2:
     {
         m_cap_right>>m_src_right;
         if(ui->checkBox_rectify->isChecked()){
             Mat temp;
-            undistort(m_src_right, temp, m_pStereoCalib->m_param.m_CameraMat2,
-                      m_pStereoCalib->m_param.m_DistMat2);
+            if(ui->checkBox_remap->isChecked()){
+                Mat map1, map2;
+                initUndistortRectifyMap(m_pStereoCalib->m_param.m_CameraMat2,
+                                        m_pStereoCalib->m_param.m_DistMat2,Mat(),
+                                        getOptimalNewCameraMatrix(m_pStereoCalib->m_param.m_CameraMat2,
+                                                                  m_pStereoCalib->m_param.m_DistMat2,
+                                                                  Size(height,width), 1,
+                                                                  Size(height,width), 0 ,false),
+                                        Size(height*2,width), CV_16SC2, map1, map2);
+                remap(m_src_right, temp, map1, map2, INTER_LINEAR);
+            }
+            else{
+                undistort(m_src_right, temp, m_pStereoCalib->m_param.m_CameraMat2,
+                          m_pStereoCalib->m_param.m_DistMat2);
+            }
             show_image(temp,m_image_right);
         }else{
             show_image(m_src_right,m_image_right);
@@ -156,8 +200,22 @@ void Dialog::onTimer_cam()
         m_cap_left>>m_src_left;
         if(ui->checkBox_rectify->isChecked()){
             Mat temp;
-            undistort(m_src_left, temp, m_pStereoCalib->m_param.m_CameraMat1,
-                      m_pStereoCalib->m_param.m_DistMat1);
+            if(ui->checkBox_remap->isChecked()){
+                Mat map1, map2;
+                initUndistortRectifyMap(m_pStereoCalib->m_param.m_CameraMat1,
+                                        m_pStereoCalib->m_param.m_DistMat1,Mat(),
+                                        getOptimalNewCameraMatrix(m_pStereoCalib->m_param.m_CameraMat1,
+                                                                  m_pStereoCalib->m_param.m_DistMat1,
+                                                                  Size(height,width), 1,
+                                                                  Size(height,width), 0 ,false),
+                                        Size(height*2,width), CV_16SC2, map1, map2);
+                remap(m_src_left, temp, map1, map2, INTER_LINEAR);
+            }
+            else{
+                undistort(m_src_left, temp, m_pStereoCalib->m_param.m_CameraMat1,
+                          m_pStereoCalib->m_param.m_DistMat1);
+            }
+
             show_image(temp,m_image_left);
         }else{
             show_image(m_src_left,m_image_left);
@@ -168,6 +226,9 @@ void Dialog::onTimer_cam()
     default:
         break;
     }
+    //stop = clock();
+    //double totaltime=(double)(stop-start)/CLOCKS_PER_SEC;
+    //qDebug()<<"one loop is "<<totaltime*1000<<"ms"<<endl;
 
 }
 
@@ -186,7 +247,7 @@ void Dialog::on_pushButton_CloseCam_clicked()
 void Dialog::on_pushButton_OpenCam_clicked()
 {
     connect(&m_timer,SIGNAL(timeout()),this,SLOT(onTimer_cam()));
-    m_timer.start(100);
+    m_timer.start(1);
     ui->pushButton_OpenCam->setDisabled(true);
     ui->pushButton_CloseCam->setEnabled(true);
     ui->pushButton_DispStart->setEnabled(true);
@@ -197,6 +258,7 @@ void Dialog::on_pushButton_OpenCam_clicked()
 
 void Dialog::on_pushButton_Calib_clicked()
 {
+    ui->checkBox_rectify->setChecked(false);
     ui->checkBox_rectify->setEnabled(false);
     ui->pushButton_Calib->setEnabled(false);
     //导入界面参数
@@ -222,7 +284,8 @@ void Dialog::on_pushButton_Calib_clicked()
                     {
                         QString filename2=filenamelist_right[i];
                         m_image_right=m_pStereoCalib->getcorners(filename2,
-                                m_pStereoCalib->m_objectPointVect2,m_pStereoCalib->m_imagePointVect2);
+                                m_pStereoCalib->m_objectPointVect2,
+                                m_pStereoCalib->m_imagePointVect2);
                     }
                 }
             }
@@ -247,8 +310,8 @@ void Dialog::on_pushButton_Calib_clicked()
                     {
                         QString filename1=filenamelist_left[i];
                         m_image_left=m_pStereoCalib->getcorners(filename1,
-                                                                m_pStereoCalib->m_objectPointVect1,
-                                                                m_pStereoCalib->m_imagePointVect1);
+                                 m_pStereoCalib->m_objectPointVect1,
+                                 m_pStereoCalib->m_imagePointVect1);
                     }
                 }
             }
@@ -261,11 +324,12 @@ void Dialog::on_pushButton_Calib_clicked()
             QMessageBox::about(this,"error","no camera");
             break;
         }
-        m_timer.start(10);
-        double err=m_pStereoCalib->CalibStart();
-        qDebug()<<err;
-        QMessageBox::about(this,"error of Calibration is",QString::number(err));
-
+        m_timer.start(100);
+        double err;
+        if(ui->checkBox_fisheye->isChecked())
+            err = m_pStereoCalib->FisheyeStart();
+        else
+            err = m_pStereoCalib->CalibStart();
     }
     if(ui->radioButton_cam->isChecked())
     {
@@ -273,6 +337,7 @@ void Dialog::on_pushButton_Calib_clicked()
     }
     ui->checkBox_rectify->setEnabled(true);
     ui->pushButton_Calib->setEnabled(true);
+    on_checkBox_rectify_clicked();
 }
 
 void Dialog::on_radioButton_img_clicked()
@@ -355,8 +420,10 @@ void Dialog::on_pushButton_DispStart_clicked()
         m_pStereoMatch->SGBM.fullDP=false;
         //int cn = m_src_left.channels();
         int cn=3;
-        m_pStereoMatch->SGBM.P1=8*cn*m_pStereoMatch->SGBM.SADWindowSize*m_pStereoMatch->SGBM.SADWindowSize;
-        m_pStereoMatch->SGBM.P2=32*cn*m_pStereoMatch->SGBM.SADWindowSize*m_pStereoMatch->SGBM.SADWindowSize;
+        m_pStereoMatch->SGBM.P1=8*cn*m_pStereoMatch->SGBM.SADWindowSize
+                *m_pStereoMatch->SGBM.SADWindowSize;
+        m_pStereoMatch->SGBM.P2=32*cn*m_pStereoMatch->SGBM.SADWindowSize
+                *m_pStereoMatch->SGBM.SADWindowSize;
         m_pStereoMatch->m_color_value=(ui->spinBox_ColorValue->text()).toInt();
     }
 
@@ -432,8 +499,10 @@ void Dialog::on_radioButton_SGBM_clicked()
         m_pStereoMatch->SGBM.fullDP=false;
         //int cn = m_src_left.channels();
         int cn=1;
-        m_pStereoMatch->SGBM.P1=8*cn*m_pStereoMatch->SGBM.SADWindowSize*m_pStereoMatch->SGBM.SADWindowSize;
-        m_pStereoMatch->SGBM.P2=32*cn*m_pStereoMatch->SGBM.SADWindowSize*m_pStereoMatch->SGBM.SADWindowSize;
+        m_pStereoMatch->SGBM.P1=8*cn*m_pStereoMatch->SGBM.SADWindowSize
+                *m_pStereoMatch->SGBM.SADWindowSize;
+        m_pStereoMatch->SGBM.P2=32*cn*m_pStereoMatch->SGBM.SADWindowSize
+                *m_pStereoMatch->SGBM.SADWindowSize;
         m_pStereoMatch->m_color_value=(ui->spinBox_ColorValue->text()).toInt();
 }
 
@@ -533,16 +602,40 @@ void Dialog::on_pushButton_chessboard_clicked()
 void Dialog::on_checkBox_rectify_clicked()
 {
     m_pStereoCalib->m_param.GetParam();
-    double fovx,fovy,focallength;
-    Point2d principalPoint;
-    double aspectRatio;
-    calibrationMatrixValues(m_pStereoCalib->m_param.m_CameraMat1,
+
+    if (!m_pStereoCalib->m_param.m_CameraMat1.empty())
+    {
+        double fovx,fovy,focallength;
+        Point2d principalPoint;
+        double aspectRatio;
+        calibrationMatrixValues(m_pStereoCalib->m_param.m_CameraMat1,
                             Size(height,width), 4.8, 3.6,
                             fovx, fovy, focallength,principalPoint,aspectRatio);
-    qDebug()<<"focal length: "<<focallength<<endl;
-    qDebug()<<"fovx: "<<fovx<<" fovy: "<<fovy<<endl;
-    qDebug()<<"principalPoint: ["<<principalPoint.x<<","<<principalPoint.y<<"]"<<endl;
-    qDebug()<<"aspectRatio: "<<aspectRatio<<endl;
+        QString str="焦距: "+QString::number(focallength)+";      "
+                +"视场角: ["+QString::number(fovx)+", "+QString::number(fovy)+"]\n"
+                +"主点: ["+QString::number(principalPoint.x)+",   "
+                +QString::number(principalPoint.y)+"];     "
+                +"fx/fy:"+QString::number(aspectRatio)+"\n "
+                +"校准误差:"+QString::number(m_pStereoCalib->m_err1)+"\n";
+        ui->label_left_info->setText(str);
+    }
+
+    if (!m_pStereoCalib->m_param.m_CameraMat2.empty())
+    {
+        double fovx,fovy,focallength;
+        Point2d principalPoint;
+        double aspectRatio;
+        calibrationMatrixValues(m_pStereoCalib->m_param.m_CameraMat2,
+                            Size(height,width), 4.8, 3.6,
+                            fovx, fovy, focallength,principalPoint,aspectRatio);
+        QString str="焦距: "+QString::number(focallength)+";      "
+                +"视场角: ["+QString::number(fovx)+", "+QString::number(fovy)+"]\n"
+                +"主点: ["+QString::number(principalPoint.x)+",   "+
+                QString::number(principalPoint.y)+"];     "
+                +"fx/fy:"+QString::number(aspectRatio)+"\n "
+                +"校准误差:"+QString::number(m_pStereoCalib->m_err2)+"\n";
+        ui->label_right_info->setText(str);
+    }
 }
 
 
@@ -557,13 +650,13 @@ void Dialog::on_pushButton_initCamera_clicked()
     num_camera = 0;
     height = (ui->lineEdit_height->text()).toInt();
     width = (ui->lineEdit_width->text()).toInt();
-    m_cap_left.set(CV_CAP_PROP_FRAME_HEIGHT,height);
-    m_cap_left.set(CV_CAP_PROP_FRAME_WIDTH,width);
-    m_cap_right.set(CV_CAP_PROP_FRAME_HEIGHT,height);
-    m_cap_right.set(CV_CAP_PROP_FRAME_WIDTH,width);
+
+
     if(m_cap_left.open(0))
     {
         num_camera++;
+        m_cap_left.set(CV_CAP_PROP_FRAME_HEIGHT,height);
+        m_cap_left.set(CV_CAP_PROP_FRAME_WIDTH,width);
         m_cap_left>>m_src_left;
         m_cap_left>>m_src_left;
         m_cap_left>>m_src_left;
@@ -571,6 +664,8 @@ void Dialog::on_pushButton_initCamera_clicked()
     if(m_cap_right.open(1))
     {
         num_camera++;
+        m_cap_right.set(CV_CAP_PROP_FRAME_HEIGHT,height);
+        m_cap_right.set(CV_CAP_PROP_FRAME_WIDTH,width);
         m_cap_right>>m_src_right;
         m_cap_right>>m_src_right;
     }
