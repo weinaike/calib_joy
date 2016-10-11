@@ -324,11 +324,11 @@ void Dialog::on_pushButton_Calib_clicked()
             break;
         }
         m_timer.start(100);
-        double err;
+
         if(ui->checkBox_fisheye->isChecked())
-            err = m_pStereoCalib->FisheyeStart();
+           double err = m_pStereoCalib->FisheyeStart();
         else
-            err = m_pStereoCalib->CalibStart();
+           double err = m_pStereoCalib->CalibStart();
     }
     if(ui->radioButton_cam->isChecked())
     {
@@ -610,7 +610,7 @@ void Dialog::on_checkBox_rectify_clicked()
         calibrationMatrixValues(m_pStereoCalib->m_param.m_CameraMat1,
                             Size(height,width), 4.8, 3.6,
                             fovx, fovy, focallength,principalPoint,aspectRatio);
-        QString str="焦距: "+QString::number(focallength)+";      "
+        QString str="\n焦距: "+QString::number(focallength)+";      "
                 +"视场角: ["+QString::number(fovx)+", "+QString::number(fovy)+"]\n"
                 +"主点: ["+QString::number(principalPoint.x)+",   "
                 +QString::number(principalPoint.y)+"];     "
@@ -627,7 +627,7 @@ void Dialog::on_checkBox_rectify_clicked()
         calibrationMatrixValues(m_pStereoCalib->m_param.m_CameraMat2,
                             Size(height,width), 4.8, 3.6,
                             fovx, fovy, focallength,principalPoint,aspectRatio);
-        QString str="焦距: "+QString::number(focallength)+";      "
+        QString str="\n焦距: "+QString::number(focallength)+";      "
                 +"视场角: ["+QString::number(fovx)+", "+QString::number(fovy)+"]\n"
                 +"主点: ["+QString::number(principalPoint.x)+",   "+
                 QString::number(principalPoint.y)+"];     "
@@ -667,5 +667,14 @@ void Dialog::on_pushButton_initCamera_clicked()
         m_cap_right.set(CV_CAP_PROP_FRAME_WIDTH,width);
         m_cap_right>>m_src_right;
         m_cap_right>>m_src_right;
+    }
+}
+
+void Dialog::on_checkBox_stitch_clicked()
+{
+    if(num_camera<2)
+    {
+        ui->checkBox_stitch->setChecked(false);
+        QMessageBox::about(this,"error","摄像头少于两个");
     }
 }

@@ -25,17 +25,18 @@ HEADERS  += dialog.h \
 
 FORMS    += dialog.ui
 
-INCLUDEPATH +=/usr/local/include/ \
-/usr/local/include/opencv \
-/usr/local/include/opencv2 \
+I#NCLUDEPATH +=/usr/local/include/ \
+#/usr/local/include/opencv \
+#/usr/local/include/opencv2 \
 
-LIBS+=/usr/local/lib/libopencv_*.so \
+#LIBS+=/usr/local/lib/libopencv_*.so \
 
-#INCLUDEPATH +=/usr/include/opencv \
-#             /usr/include/opencv2 \
-#             /usr/include \
+INCLUDEPATH +=E:\opencv\build\include\opencv\
+             E:\opencv\build\include\opencv2\
+             E:\opencv\build\include\
+            C:\Qt\tbb44_20151115oss\include
 
-#LIBS+=/usr/lib/x86_64-linux-gnu/libopencv_*.so \
+LIBS+=E:\opencv\build\mingw\lib\libopencv_*.a\
 
 
 

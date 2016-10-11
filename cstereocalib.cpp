@@ -6,6 +6,9 @@ CStereoCalib::CStereoCalib()
     m_param = CParamCalib();
     flag = 0;
     flag_stereo = false;
+    m_err1 = 0;
+    m_err2 = 0;
+    m_err   = 0;
 }
 
 

@@ -52,6 +52,8 @@ private slots:
     void on_checkBox_rectify_clicked();
     void on_pushButton_initCamera_clicked();
 
+    void on_checkBox_stitch_clicked();
+
 private:
     Ui::Dialog *ui;
     CStereoCalib *m_pStereoCalib;//相机标定
