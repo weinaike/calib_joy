@@ -11,11 +11,14 @@ Dialog::Dialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Dialog)
 {
-
     ui->setupUi(this);
     num_camera = 0;
     height = (ui->lineEdit_height->text()).toInt();
     width = (ui->lineEdit_width->text()).toInt();
+    cmos_hegiht = (ui->lineEdit_height_cmos->text()).toFloat();
+    cmos_width = (ui->lineEdit_width_cmos->text()).toFloat();
+    m_remapx = (ui->lineEdit_remapx->text()).toFloat();
+    m_remapy = (ui->lineEdit_remapy->text()).toFloat();
 
     if(m_cap_left.open(0))
     {
@@ -163,6 +166,13 @@ void Dialog::show_image(const Mat & m_src,QImage & imagescaled){
     imagescaled=m_image.scaled(320,240,Qt::KeepAspectRatio);
 }
 
+void Dialog::show_result(const Mat & m_result)
+{
+    QImage result=Mat2QImage(m_result);
+    QImage imagescaled=result.scaled(320,240,Qt::KeepAspectRatio);
+    ui->label_stitch->setPixmap(QPixmap::fromImage(imagescaled));
+}
+
 void Dialog::onTimer_cam()
 {
     //clock_t start,stop;
@@ -176,13 +186,12 @@ void Dialog::onTimer_cam()
             if(ui->checkBox_remap->isChecked()){
                 Mat map1, map2;
                 initUndistortRectifyMap(m_pStereoCalib->m_param.m_CameraMat2,
-                                        m_pStereoCalib->m_param.m_DistMat2,Mat(),
-                                        getOptimalNewCameraMatrix(m_pStereoCalib->m_param.m_CameraMat2,
-                                                                  m_pStereoCalib->m_param.m_DistMat2,
-                                                                  Size(height,width), 1,
-                                                                  Size(height,width), 0 ,false),
-                                        Size(height*2,width), CV_16SC2, map1, map2);
-                remap(m_src_right, temp, map1, map2, INTER_LINEAR);
+                                        m_pStereoCalib->m_param.m_DistMat2,Mat(),Mat(),
+                                        Size(height*m_remapx,width*m_remapy), CV_32FC1  , map1, map2);
+                remap(m_src_right, temp, map1, map2, INTER_NEAREST );
+                cout<<map1.size()<<endl;
+                cout<<map2.size()<<endl;
+
             }
             else{
                 undistort(m_src_right, temp, m_pStereoCalib->m_param.m_CameraMat2,
@@ -193,6 +202,7 @@ void Dialog::onTimer_cam()
             show_image(m_src_right,m_image_right);
         }
         ui->label_right->setPixmap(QPixmap::fromImage(m_image_right));
+
     }
     case 1:
     {
@@ -202,12 +212,8 @@ void Dialog::onTimer_cam()
             if(ui->checkBox_remap->isChecked()){
                 Mat map1, map2;
                 initUndistortRectifyMap(m_pStereoCalib->m_param.m_CameraMat1,
-                                        m_pStereoCalib->m_param.m_DistMat1,Mat(),
-                                        getOptimalNewCameraMatrix(m_pStereoCalib->m_param.m_CameraMat1,
-                                                                  m_pStereoCalib->m_param.m_DistMat1,
-                                                                  Size(height,width), 1,
-                                                                  Size(height,width), 0 ,false),
-                                        Size(height*2,width), CV_16SC2, map1, map2);
+                                        m_pStereoCalib->m_param.m_DistMat1,Mat(),Mat(),
+                                        Size(height*m_remapx,width*m_remapy), CV_32FC1, map1, map2);
                 remap(m_src_left, temp, map1, map2, INTER_LINEAR);
             }
             else{
@@ -250,6 +256,7 @@ void Dialog::on_pushButton_OpenCam_clicked()
     ui->pushButton_OpenCam->setDisabled(true);
     ui->pushButton_CloseCam->setEnabled(true);
     ui->pushButton_DispStart->setEnabled(true);
+    ui->checkBox_stitch->setChecked(false);
     if(ui->radioButton_cam->isChecked())
         ui->pushButton_chessboard->setEnabled(true);
 
@@ -608,13 +615,13 @@ void Dialog::on_checkBox_rectify_clicked()
         Point2d principalPoint;
         double aspectRatio;
         calibrationMatrixValues(m_pStereoCalib->m_param.m_CameraMat1,
-                            Size(height,width), 4.8, 3.6,
+                            Size(height,width), cmos_width, cmos_hegiht,
                             fovx, fovy, focallength,principalPoint,aspectRatio);
         QString str="\n焦距: "+QString::number(focallength)+";      "
                 +"视场角: ["+QString::number(fovx)+", "+QString::number(fovy)+"]\n"
                 +"主点: ["+QString::number(principalPoint.x)+",   "
                 +QString::number(principalPoint.y)+"];     "
-                +"fx/fy:"+QString::number(aspectRatio)+"\n "
+                +"fx/fy:"+QString::number(aspectRatio)+"\n"
                 +"校准误差:"+QString::number(m_pStereoCalib->m_err1)+"\n";
         ui->label_left_info->setText(str);
     }
@@ -625,13 +632,13 @@ void Dialog::on_checkBox_rectify_clicked()
         Point2d principalPoint;
         double aspectRatio;
         calibrationMatrixValues(m_pStereoCalib->m_param.m_CameraMat2,
-                            Size(height,width), 4.8, 3.6,
+                            Size(height,width), cmos_width, cmos_hegiht,
                             fovx, fovy, focallength,principalPoint,aspectRatio);
         QString str="\n焦距: "+QString::number(focallength)+";      "
                 +"视场角: ["+QString::number(fovx)+", "+QString::number(fovy)+"]\n"
                 +"主点: ["+QString::number(principalPoint.x)+",   "+
                 QString::number(principalPoint.y)+"];     "
-                +"fx/fy:"+QString::number(aspectRatio)+"\n "
+                +"fx/fy:"+QString::number(aspectRatio)+"\n"
                 +"校准误差:"+QString::number(m_pStereoCalib->m_err2)+"\n";
         ui->label_right_info->setText(str);
     }
@@ -644,6 +651,7 @@ void Dialog::on_pushButton_initCamera_clicked()
     m_timer.stop();
     ui->pushButton_CloseCam->setEnabled(false);
     ui->pushButton_OpenCam->setEnabled(true);
+
     m_cap_left.release();
     m_cap_right.release();
     num_camera = 0;
@@ -667,6 +675,7 @@ void Dialog::on_pushButton_initCamera_clicked()
         m_cap_right.set(CV_CAP_PROP_FRAME_WIDTH,width);
         m_cap_right>>m_src_right;
         m_cap_right>>m_src_right;
+        m_cap_right>>m_src_right;
     }
 }
 
@@ -677,4 +686,134 @@ void Dialog::on_checkBox_stitch_clicked()
         ui->checkBox_stitch->setChecked(false);
         QMessageBox::about(this,"error","摄像头少于两个");
     }
+    else
+    {
+        if(ui->checkBox_stitch->isChecked())
+
+            on_pushButton_CloseCam_clicked();
+
+    }
+}
+
+
+void Dialog::on_pushButton_load_clicked()
+{
+    ui->pushButton_load->setEnabled(false);
+    ui->checkBox_stitch->setEnabled(false);
+    ui->label_stitchstatus->setText(" 拼接中");
+    ui->label_stitch->setText("拼接图");
+     vector<Mat> imgs;
+     //where are images come from, camera or image files;
+    if(ui->checkBox_stitch->isChecked())
+    {
+        if(ui->checkBox_rectify->isChecked())
+        {
+
+            Mat temp1,temp2;
+            if(ui->checkBox_remap->isChecked())
+            {
+                Mat map1,map2;
+                initUndistortRectifyMap(m_pStereoCalib->m_param.m_CameraMat1,
+                                        m_pStereoCalib->m_param.m_DistMat1,Mat(),Mat(),
+                                        Size(height*m_remapx,width*m_remapy), CV_32FC1, map1, map2);
+                remap(m_src_left, temp1, map1, map2, INTER_LINEAR);
+                imgs.push_back(temp1);
+                initUndistortRectifyMap(m_pStereoCalib->m_param.m_CameraMat2,
+                                         m_pStereoCalib->m_param.m_DistMat2,Mat(),Mat(),
+                                         Size(height*m_remapx,width*m_remapy), CV_32FC1, map1, map2);
+                remap(m_src_right, temp2, map1, map2, INTER_LINEAR);
+                imgs.push_back(temp2);
+            }
+            else
+            {
+                undistort(m_src_left, temp1, m_pStereoCalib->m_param.m_CameraMat1,
+                          m_pStereoCalib->m_param.m_DistMat1);
+                imgs.push_back(temp1);
+                undistort(m_src_right, temp2, m_pStereoCalib->m_param.m_CameraMat2,
+                          m_pStereoCalib->m_param.m_DistMat2);
+                imgs.push_back(temp2);
+            }
+
+        }
+        else{
+            imgs.push_back(m_src_left);
+            imgs.push_back(m_src_right);
+        }
+    }
+    else
+    {
+        QStringList filenamelist=QFileDialog::getOpenFileNames(
+                    this,QString::fromLocal8Bit("待拼接图片"),"",
+                    tr("Images (*.png *.bmp *.jpg *.tif *.GIF )"));
+        if(!filenamelist.empty()){
+            for(int i=0;i<filenamelist.count();++i)
+            {
+                QString filename=filenamelist[i];
+                Mat temp = imread(filename.toStdString());
+                imgs.push_back(temp);
+
+            }
+
+        }
+    }
+   // if count of images is more than 2 , process stitch
+    if (imgs.size()>=2)
+    {
+        QImage result1=Mat2QImage(imgs[0]);
+        QImage imagescaled1=result1.scaled(320,240,Qt::KeepAspectRatio);
+        ui->label_left->setPixmap(QPixmap::fromImage(imagescaled1));
+
+       QImage result2=Mat2QImage(imgs[1]);
+       QImage imagescaled2=result2.scaled(320,240,Qt::KeepAspectRatio);
+       ui->label_right->setPixmap(QPixmap::fromImage(imagescaled2));
+
+       Stitcher::Status s ;
+       if(ui->checkBox_custom->isChecked())
+       {
+           s=m_stitchprocess.detailstitch(imgs,m_pano);
+           imwrite("left.jpg",imgs[0]);
+           imwrite("right.jpg",imgs[1]);
+       }
+       else
+       {
+           s = m_stitchprocess.simplestitch(imgs,m_pano);
+           cout<<m_pano.size()<<endl;
+
+       }
+        if(s==Stitcher::OK)
+        {
+            ui->label_stitchstatus->setText("拼接成功");
+            show_result(m_pano);
+        }
+        else
+        {
+             ui->label_stitchstatus->setText("拼接失败");
+        }
+    }
+    else
+    {
+        ui->label_stitchstatus->setText("images is less than 2, need more images");
+    }
+    ui->pushButton_load->setEnabled(true);
+    ui->checkBox_stitch->setEnabled(true);
+}
+
+void Dialog::on_lineEdit_height_cmos_editingFinished()
+{
+    cmos_hegiht = (ui->lineEdit_height_cmos->text()).toFloat();
+}
+
+void Dialog::on_lineEdit_width_cmos_editingFinished()
+{
+    cmos_width = (ui->lineEdit_width_cmos->text()).toFloat();
+}
+
+void Dialog::on_lineEdit_remapx_editingFinished()
+{
+    m_remapx = (ui->lineEdit_remapx->text()).toFloat();
+}
+
+void Dialog::on_lineEdit_remapy_editingFinished()
+{
+    m_remapy = (ui->lineEdit_remapy->text()).toFloat();
 }

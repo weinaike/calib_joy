@@ -9,7 +9,5 @@ using namespace cv;
 QImage Mat2QImage(const Mat &);
 Mat QImage2Mat(QImage image);
 
-
-
 #endif // QIMAGEMAT
 

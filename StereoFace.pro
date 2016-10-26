@@ -15,13 +15,15 @@ SOURCES += main.cpp\
     cstereomatch.cpp \
     cstereocalib.cpp \
     cparamcalib.cpp \
-    qimagemat.cpp
+    qimagemat.cpp \
+    cstitch.cpp
 
 HEADERS  += dialog.h \
     cstereomatch.h \
     cstereocalib.h \
     cparamcalib.h \
-    qimagemat.h
+    qimagemat.h \
+    cstitch.h
 
 FORMS    += dialog.ui
 
@@ -36,7 +38,4 @@ INCLUDEPATH +=E:\opencv\build\include\opencv\
              E:\opencv\build\include\
             C:\Qt\tbb44_20151115oss\include
 
-LIBS+=E:\opencv\build\mingw\lib\libopencv_*.a\
-
-
-
+LIBS+=E:\opencv\build\mingw\lib\libopencv_*.dll.a
