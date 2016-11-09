@@ -5,7 +5,7 @@ CStereoCalib::CStereoCalib()
 {
     m_param = CParamCalib();
     flag = 0;
-    flag_stereo = false;
+    flag_stereo = true;
     m_err1 = 0;
     m_err2 = 0;
     m_err   = 0;
@@ -48,9 +48,10 @@ double CStereoCalib::CalibStart()
                               TermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 100, 1e-5),
                               CV_CALIB_FIX_INTRINSIC);
         Rodrigues(R,Rout);
-        qDebug()<<"cameraMat1"<<cameraMat1.at<double>(0,0);
-        qDebug()<<"cameraMat2"<<cameraMat2.at<double>(0,0);
-        qDebug()<<"T:"<<T.at<double>(0,0);
+        cout<<"cameraMat1"<<endl<<cameraMat1<<endl;
+        cout<<"cameraMat2"<<endl<<cameraMat2<<endl;
+        cout<<"R"<<endl<<R<<endl;
+        cout<<"T"<<endl<<T<<endl;
         stereoRectify(cameraMat1,DistMat1,cameraMat2,DistMat2,m_imagesize,R,T,R1,R2,P1,P2,Q,
                       CALIB_ZERO_DISPARITY,-1,Size(),&roi1,&roi2);
         initUndistortRectifyMap(cameraMat1,DistMat1,R1,P1,m_imagesize,CV_32FC1,map1x,map1y);
@@ -68,6 +69,8 @@ double CStereoCalib::CalibStart()
         m_param.m_roi1=roi1;
         m_param.m_roi2=roi2;
         m_param.m_T=T;
+        m_param.m_E = E;
+        m_param.m_F = F;
     }
     m_param.SaveParam();
     return m_err;
@@ -144,7 +147,7 @@ QImage CStereoCalib::getcorners(QString & filename,
     bool found;
     cvtColor(src,src_gray,CV_RGB2GRAY);
     found=findChessboardCorners(src_gray,m_boardsize,imagePoint,
-                                CALIB_CB_ADAPTIVE_THRESH+CALIB_CB_NORMALIZE_IMAGE);
+                                CALIB_CB_FAST_CHECK|CV_CALIB_CB_ADAPTIVE_THRESH);
     if(found){
         //图像空间的像点
         cornerSubPix(src_gray,Mat(imagePoint),Size((m_boardsize.width-1)/2,

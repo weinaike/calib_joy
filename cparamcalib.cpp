@@ -20,10 +20,12 @@ void CParamCalib::GetParam(){
     fs["P1"]>>m_P1;
     fs["P2"]>>m_P2;
     fs["Q"]>>m_Q;
-    fs["map1x"]>>m_map1x;
-    fs["map2x"]>>m_map2x;
-    fs["map1y"]>>m_map1y;
-    fs["map2y"]>>m_map2y;
+    fs["E"]>>m_E;
+    fs["F"]>>m_F;
+    //fs["map1x"]>>m_map1x;
+    //fs["map2x"]>>m_map2x;
+    //fs["map1y"]>>m_map1y;
+    //fs["map2y"]>>m_map2y;
     fs["roi1"]>>m_roi1;
     fs["roi2"]>>m_roi2;
 
@@ -43,10 +45,12 @@ void CParamCalib::SaveParam(){
     fs<<"P1"<<m_P1;
     fs<<"P2"<<m_P2;
     fs<<"Q"<<m_Q;
-    fs<<"map1x"<<m_map1x;
-    fs<<"map2x"<<m_map2x;
-    fs<<"map1y"<<m_map1y;
-    fs<<"map2y"<<m_map2y;
+    fs<<"E"<<m_E;
+    fs<<"F"<<m_F;
+    //fs<<"map1x"<<m_map1x;
+    //fs<<"map2x"<<m_map2x;
+    //fs<<"map1y"<<m_map1y;
+    //fs<<"map2y"<<m_map2y;
     fs<<"roi1"<<m_roi1;
     fs<<"roi2"<<m_roi2;
 }

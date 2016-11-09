@@ -207,6 +207,8 @@ void Dialog::onTimer_cam()
     case 1:
     {
         m_cap_left>>m_src_left;
+        //imshow("test",m_src_left);
+        //waitKey(1);
         if(ui->checkBox_rectify->isChecked()){
             Mat temp;
             if(ui->checkBox_remap->isChecked()){
@@ -231,6 +233,7 @@ void Dialog::onTimer_cam()
     default:
         break;
     }
+
     //stop = clock();
     //double totaltime=(double)(stop-start)/CLOCKS_PER_SEC;
     //qDebug()<<"one loop is "<<totaltime*1000<<"ms"<<endl;
@@ -771,8 +774,7 @@ void Dialog::on_pushButton_load_clicked()
        if(ui->checkBox_custom->isChecked())
        {
            s=m_stitchprocess.detailstitch(imgs,m_pano);
-           imwrite("left.jpg",imgs[0]);
-           imwrite("right.jpg",imgs[1]);
+
        }
        else
        {
@@ -780,7 +782,7 @@ void Dialog::on_pushButton_load_clicked()
            cout<<m_pano.size()<<endl;
 
        }
-        if(s==Stitcher::OK)
+       if(s==Stitcher::OK)
         {
             ui->label_stitchstatus->setText("拼接成功");
             show_result(m_pano);
@@ -816,4 +818,42 @@ void Dialog::on_lineEdit_remapx_editingFinished()
 void Dialog::on_lineEdit_remapy_editingFinished()
 {
     m_remapy = (ui->lineEdit_remapy->text()).toFloat();
+}
+
+void Dialog::on_pushButton_clicked()
+{
+    m_src_left = imread("up.jpg");
+    m_src_right  = imread("down.jpg");
+    if(ui->checkBox_rectify->isChecked()){
+        Mat temp1,temp2;
+        if(ui->checkBox_remap->isChecked()){
+            Mat map1, map2;
+            initUndistortRectifyMap(m_pStereoCalib->m_param.m_CameraMat2,
+                                        m_pStereoCalib->m_param.m_DistMat2,Mat(),Mat(),
+                                        Size(height*m_remapx,width*m_remapy), CV_32FC1  , map1, map2);
+            remap(m_src_right, temp2, map1, map2, INTER_NEAREST );
+            initUndistortRectifyMap(m_pStereoCalib->m_param.m_CameraMat1,
+                                    m_pStereoCalib->m_param.m_DistMat1,Mat(),Mat(),
+                                    Size(height*m_remapx,width*m_remapy), CV_32FC1, map1, map2);
+            remap(m_src_left, temp1, map1, map2, INTER_LINEAR);
+
+            }
+        else{
+                undistort(m_src_right, temp2, m_pStereoCalib->m_param.m_CameraMat2,
+                          m_pStereoCalib->m_param.m_DistMat2);
+                undistort(m_src_left, temp1, m_pStereoCalib->m_param.m_CameraMat1,
+                          m_pStereoCalib->m_param.m_DistMat1);
+            }
+        //Mat dst;
+        //warpPerspective(temp2,dst,m_pStereoCalib->m_param.m_R,temp1.size());
+        //cout<<m_pStereoCalib->m_param.m_R<<endl;
+        show_image(temp2,m_image_right);
+        show_image(temp1,m_image_left);
+    }
+    else{
+            show_image(m_src_right,m_image_right);
+            show_image(m_src_left,m_image_left);
+    }
+    ui->label_right->setPixmap(QPixmap::fromImage(m_image_right));
+    ui->label_left->setPixmap(QPixmap::fromImage(m_image_left));
 }

@@ -38,4 +38,4 @@ INCLUDEPATH +=E:\opencv\build\include\opencv\
              E:\opencv\build\include\
             C:\Qt\tbb44_20151115oss\include
 
-LIBS+=E:\opencv\build\mingw\lib\libopencv_*.dll.a
+LIBS+=E:\opencv\build\mingw\lib\libopencv_*2410.dll.a

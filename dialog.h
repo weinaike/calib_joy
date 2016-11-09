@@ -66,6 +66,8 @@ private slots:
 
     void on_lineEdit_remapy_editingFinished();
 
+    void on_pushButton_clicked();
+
 private:
     Ui::Dialog *ui;
     CStereoCalib *m_pStereoCalib;//相机标定

@@ -23,9 +23,7 @@ Stitcher::Status cstitch::simplestitch(std::vector<Mat> &images, Mat &pano){
 
 Stitcher::Status cstitch::detailstitch(std::vector<Mat> &images,Mat &pano)
 {
-
     string ba_refine_mask = "xxxxx";
-    string warp_type = "spherical";
     float match_conf = 0.1f;
     float blend_strength = 5;
     Ptr<FeaturesFinder> finder;
@@ -56,32 +54,20 @@ Stitcher::Status cstitch::detailstitch(std::vector<Mat> &images,Mat &pano)
         cameras[i].R.convertTo(R, CV_32F);
         cameras[i].R = R;
     }
-    cout<<"cameras"<<cameras.size()<<endl;
-    Ptr<detail::BundleAdjusterBase> adjuster;
-    adjuster = new detail::BundleAdjusterRay();
-    adjuster->setConfThresh(0.2);
-    Mat_<uchar> refine_mask = Mat::zeros(3, 3, CV_8U);
-    if (ba_refine_mask[0] == 'x') refine_mask(0,0) = 1;
-    if (ba_refine_mask[1] == 'x') refine_mask(0,1) = 1;
-    if (ba_refine_mask[2] == 'x') refine_mask(0,2) = 1;
-    if (ba_refine_mask[3] == 'x') refine_mask(1,1) = 1;
-    if (ba_refine_mask[4] == 'x') refine_mask(1,2) = 1;
-    adjuster->setRefinementMask(refine_mask);
-    (*adjuster)(features, pairwise_matches, cameras);
 
     vector<double> focals;
     for (size_t i = 0; i < cameras.size(); ++i)
     {
         focals.push_back(cameras[i].focal);
     }
-    cout<<"left focal :"<<focals[0]<<" / rightfocal :"<<focals[1]<<endl;
+    cout<<"left focal :"<<focals[0]<<" / right focal :"<<focals[1]<<endl;
     sort(focals.begin(), focals.end());
     float warped_image_scale;
     if (focals.size() % 2 == 1)
         warped_image_scale = static_cast<float>(focals[focals.size() / 2]);
     else
         warped_image_scale = static_cast<float>(focals[focals.size() / 2 - 1] + focals[focals.size() / 2]) * 0.5f;
-    cout<<"warped_image_scale"<<warped_image_scale<<endl;
+
     vector<Point> corners(num_images);
     vector<Mat> masks_warped(num_images);
     vector<Mat> images_warped(num_images);
@@ -95,6 +81,7 @@ Stitcher::Status cstitch::detailstitch(std::vector<Mat> &images,Mat &pano)
     }
     // Warp images and their masks
 
+
     Ptr<WarperCreator> warper_creator;
     warper_creator = new cv::PlaneWarper();
     double seam_work_aspect = 1;
@@ -104,6 +91,7 @@ Stitcher::Status cstitch::detailstitch(std::vector<Mat> &images,Mat &pano)
         Mat_<float> K;
         cameras[i].K().convertTo(K, CV_32F);
         float swa = (float)seam_work_aspect;
+        cout<<K<<endl;
         K(0,0) *= swa; K(0,2) *= swa;
         K(1,1) *= swa; K(1,2) *= swa;
 
@@ -154,20 +142,16 @@ Stitcher::Status cstitch::detailstitch(std::vector<Mat> &images,Mat &pano)
 
             blender->prepare(corners, sizes);
         }
-
         // Blend the current image
         blender->feed(img_warped_s, mask_warped, corners[img_idx]);
     }
-    if(!pano.data)
-    {
-        cout<<"nothing"<<endl;
-    }
-    Mat result_mask;
-    blender->blend(pano, result_mask);
-    cout<<pano.size();
-    if(!pano.data)
-    {
-        cout<<"nothing"<<endl;
-    }
+
+    Mat result,result_mask;
+    blender->blend(result, result_mask);
+    result.convertTo(pano,CV_8UC3);
+    result.release();
+    result_mask.release();
+    imshow("pano",pano);
+    waitKey(1);
     return Stitcher::Status::OK;
 }

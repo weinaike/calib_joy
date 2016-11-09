@@ -18,6 +18,7 @@ public:
     Mat m_DistMat1;
     Mat m_DistMat2;
     Mat m_R1,m_R2,m_P1,m_P2,m_Q,m_R,m_T;
+    Mat m_E,m_F;
     Rect m_roi1,m_roi2;
     Mat m_map1x,m_map1y,m_map2x,m_map2y;
 };

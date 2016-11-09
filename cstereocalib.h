@@ -6,6 +6,7 @@
 #include "qimagemat.h"
 #include "opencv.hpp"
 using namespace cv;
+using namespace std;
 class CStereoCalib
 {
 public:
